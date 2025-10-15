@@ -1,6 +1,5 @@
-mkdir build/
-i686-elf-as src/boot.s -o build/boot.o
-i686-elf-gcc -c src/kernel.c -o build/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-i686-elf-ld -T src/linker.ld -o build/kernel.elf build/boot.o build/kernel.o -nostdlib
-qemu-system-x86_64 -kernel build/kernel.elf
-rm -rf build/
+rm -rf build && mkdir -p build
+x86_64-elf-gcc -c -m64 -ffreestanding -o build/boot.o src/boot.s
+x86_64-elf-gcc -c -m64 -ffreestanding -O2 -o build/kernel.o src/kernel.c
+x86_64-elf-ld -nostdlib -T src/linker.ld build/boot.o build/kernel.o -o build/kernel.elf
+qemu-system-x86_64 -kernel build/kernel.elf -machine type=pc-i440fx-3.1

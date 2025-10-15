@@ -13,18 +13,18 @@
 .section .bss
 .align 16
 stack_bottom:
-.skip 16384
+    .skip 16384
 stack_top:
 .align 16
 stack64_bottom:
-.skip 16384
+    .skip 16384
 stack64_top:
 .align 4096
 pml4_table:
-.skip 4096
+    .skip 4096
 .align 4096
 pdpt_table:
-.skip 4096
+    .skip 4096
 
 .section .data
 .align 8
@@ -38,7 +38,7 @@ gdt_descriptor:
     .long gdt
 
 .code32
-.section .text
+.text
 .global _start
 .type _start, @function
 _start:
@@ -78,17 +78,20 @@ _start:
     movl %eax, %cr0
     nop
     ljmp $0x08, $long_mode_entry
-    .code64
+
+.code64
+.text
+.global long_mode_entry
+.type long_mode_entry, @function
 long_mode_entry:
     movw $0x10, %ax
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %ss
-    leaq stack64_top(%rip), %rsp
+    lea stack64_top(%rip), %rsp
     call kernel_main
-hang:
-    cli
 1:
+    cli
     hlt
     jmp 1b
 .size _start, . - _start
