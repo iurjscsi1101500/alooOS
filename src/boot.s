@@ -88,7 +88,7 @@ long_mode_entry:
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %ss
-    lea stack64_top(%rip), %rsp
+    leaq stack64_top(%rip), %rsp
     call kernel_main
 1:
     cli
