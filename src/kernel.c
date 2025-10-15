@@ -18,6 +18,7 @@ size_t strlen(const char* str)
     return len;
 }
 
+// memory shit
 #define HEAP_SIZE (1024 * 1024)
 #define ALIGN(size) (((size) + 7) & ~((size_t)7))
 
@@ -91,16 +92,77 @@ void free(void* ptr) {
     free_list = block;
 }
 
+void memcpy(void *to, void *from, size_t size) {
+    uint8_t *cfrom = (uint8_t *)from;
+    uint8_t *cto = (uint8_t *)to;
+
+    for (size_t i = 0; i < size; i++) {
+	cto[i] = cfrom[i];
+    }
+}
+/*
+ * I/O
+ */
 uint8_t inb(uint16_t port) {
     uint8_t result;
     asm volatile("inb %1, %0" : "=a"(result) : "Nd"(port));
     return result;
 }
 
-void outb(uint16_t port, uint8_t value) {
-    asm volatile("outb %0, %1" : : "a"(value), "Nd"(port));
+uint16_t inw(uint16_t port) {
+    uint16_t val;
+    asm volatile("inw %w1, %0" : "=a"(val) : "Nd"(port));
+    return val;
 }
 
+uint32_t inl(uint16_t port) {
+    uint32_t val;
+    asm volatile("inl %w1, %0" : "=a"(val) : "Nd"(port));
+    return val;
+}
+
+void outb(uint16_t port, uint8_t val) {
+    asm volatile("outb %0, %w1" : : "a"(val), "Nd"(port));
+}
+
+void outw(uint16_t port, uint16_t val) {
+    asm volatile("outw %0, %w1" : : "a"(val), "Nd"(port));
+}
+
+void outl(uint16_t port, uint32_t val) {
+    asm volatile("outl %0, %w1" : : "a"(val), "Nd"(port));
+}
+
+uint8_t ioread8(volatile void *addr) {
+    return *(volatile uint8_t *)addr;
+}
+
+uint16_t ioread16(volatile void *addr) {
+    uint16_t tmp;
+    memcpy(&tmp, (void *)addr, sizeof(tmp));
+    return tmp;
+}
+
+uint32_t ioread32(volatile void *addr) {
+    uint32_t tmp;
+    memcpy(&tmp, (void *)addr, sizeof(tmp));
+    return tmp;
+}
+
+void iowrite8(volatile void *addr, uint8_t val) {
+    *(volatile uint8_t *)addr = val;
+}
+
+void iowrite16(volatile void *addr, uint16_t val) {
+    memcpy((void *)addr, &val, sizeof(val));
+}
+
+void iowrite32(volatile void *addr, uint32_t val) {
+    memcpy((void *)addr, &val, sizeof(val));
+}
+/*
+ * PS/2 DRIVER
+ */
 void wait_for_input_buffer_clear() {
     while (inb(0x64) & 0x02);
 }
